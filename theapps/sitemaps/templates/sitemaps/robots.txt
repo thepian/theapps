@@ -1,0 +1,7 @@
+{% if rules %}{% regroup rules by robot as robot_rules %}{% for robot in robot_rules %}User-agent: {{ robot.grouper }}
+{% for rule in robot.list %}{% if rule.allow %}Allow: {{ rule.pattern }}{% endif %}{% if rule.disallow %}
+Disallow: {{ rule.pattern }}{% endif %}{% endfor %}{% if crawl_delay %}
+Crawl-delay: {{ crawl_delay }}{% endif %}{% endfor %}
+{% else %}User-agent: *
+{% comment %}Disallow:{% endcomment %}{% endif %}{% if sitemap_url %}Sitemap: {{ sitemap_url }}{% endif %}
+

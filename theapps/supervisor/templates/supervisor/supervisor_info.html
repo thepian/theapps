@@ -1,0 +1,27 @@
+<dl class="affinity_info">
+    {{ affinity.as_dl|safe }}
+    <dt>From Country</dt><dd>{{ HTTP_COUNTRY }}</dd>
+</dl>
+<form method="GET" action="">
+<label>Access Code</label><input name="ticket" type="text">
+<button>Enter</button>
+</form>
+
+<dl class="access_tickets_info">
+    {% for at in access_tickets %}
+    <dt>{{ at.level }} access to http://{{ at.domain }}{{ at.path }}</dt>
+    {% endfor %}
+</dl>
+<dl class="used_tickets_info">
+    {% for ut in used_tickets %}
+    <dt>{{ ut.level }} access to http://{{ ut.domain }}{{ ut.path }}</dt>
+    {% endfor %}
+</dl>
+
+<dl class="affinity_access_info">
+    {{ affinity_access.as_dl|safe }}
+</dl>
+
+<dl class="userdata_info">
+    {{ userdata.as_dl|safe }}
+</dl>

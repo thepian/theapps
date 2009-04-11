@@ -1,0 +1,5 @@
+from base import check_http_access, http_access_required
+
+import default_settings
+import theapps
+theapps.amend_default_settings(default_settings)

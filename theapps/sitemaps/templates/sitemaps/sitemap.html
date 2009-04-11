@@ -1,0 +1,13 @@
+{% extends "site_base.html"%}
+
+{% block title %}Sitemap{% endblock %}
+{% block main %}
+<dl>
+{% for url in urlset %}
+  <dd>
+    <a href="{{ url.location }}">{{ url.location|escape }}</a>
+    {% if url.lastmod %}<em>{{ url.lastmod|date:"Y-m-d" }}</em>{% endif %}
+   </dd>
+{% endfor %}
+</dl>
+{% endblock %}
