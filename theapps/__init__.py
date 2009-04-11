@@ -12,6 +12,8 @@ __email__ = "hvendelbo.dev@googlemail.com"
 def get_version():
     return __version__
     
+def execute_from_command_line(argv=None):
+    print argv
     
 def amend_default_settings(defaults):
     from django.conf import settings
