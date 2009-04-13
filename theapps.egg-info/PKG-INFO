@@ -1,0 +1,18 @@
+Metadata-Version: 1.0
+Name: theapps
+Version: 0.1
+Summary: The Thepian Django Apps
+Home-page: www.thepian.org
+Author: Henrik Vendelbo
+Author-email: hvendelbo.dev@googlemail.com
+License: GPL
+Description: UNKNOWN
+Keywords: thepian theapps django
+Platform: UNKNOWN
+Classifier: Development Status :: Alpha
+Classifier: Environment :: Web Environment
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Framework :: Django
+Classifier: Programming Language :: Python :: 2.5
+Classifier: Programming Language :: JavaScript

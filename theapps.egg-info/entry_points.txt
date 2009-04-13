@@ -1,0 +1,3 @@
+[console_scripts]
+theapps-admin = theapps:execute_from_command_line
+

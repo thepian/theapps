@@ -1,0 +1,9 @@
+README
+setup.py
+theapps/__init__.py
+theapps.egg-info/PKG-INFO
+theapps.egg-info/SOURCES.txt
+theapps.egg-info/dependency_links.txt
+theapps.egg-info/entry_points.txt
+theapps.egg-info/not-zip-safe
+theapps.egg-info/top_level.txt
