@@ -24,7 +24,7 @@ def vars(request):
         'AFFINITY_PASS' : check_pass,
         'AFFINITY_CHECK' : '%s == %s' %  (check, check_result),
         'HTTP_COUNTRY' : request.META.get(structure.HTTP_COUNTRY_VARIABLE),
-        'HTTP_HOST' : structure.get_base_domain(request.META),
+        'HTTP_HOST' : request.site.base_domain,
         'SHARD_DOMAIN' : request.affinity.domain
     }
 

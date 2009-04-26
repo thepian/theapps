@@ -13,3 +13,5 @@ META_LANGUAGE = "English"
 META_COUNTRY = ""
 META_KEYWORDS = ""
 META_DESCRIPTION = ""
+
+#SUBDOMAINS = ("www","media",'aa','ab','ac','ad','ae','af','ag','ah','ai','aj','ak','al',)

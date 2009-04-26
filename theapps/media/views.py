@@ -1,7 +1,7 @@
 from django.http import HttpResponse, Http404
 from django.template import RequestContext, loader
+from django.conf import settings
 
-from thepian.conf import structure
 from thepian.tickets import Identity
 from thepian.assets import Asset
 
@@ -10,7 +10,7 @@ from forms import *
 def hello(request):
     msg = '''the {{ HTTP_DOMAIN }} site is not meant to be browsed directly.
         '''.replace('{{ HTTP_DOMAIN }}',request.site.domain)
-    if structure.DEVELOPING:
+    if settings.DEVELOPING:
         raise Http404(msg)
     return HttpResponse(msg)
     
@@ -19,9 +19,9 @@ def blank(request):
 
 def crossdomain(request):
     data = {
-        'media_domains': ['media.'+name for name in structure.DOMAINS],
-        'base_domains': structure.DOMAINS,
-        'star_domains': ['*.'+name for name in structure.DOMAINS],
+        'media_domains': ['media.'+name for name in settings.DOMAINS],
+        'base_domains': settings.DOMAINS,
+        'star_domains': ['*.'+name for name in settings.DOMAINS],
     }
     return HttpResponse(loader.render_to_string('crossdomain.xml',data,
         context_instance=RequestContext(request)),mimetype="text/x-cross-domain-policy")
