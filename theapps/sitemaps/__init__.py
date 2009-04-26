@@ -1,7 +1,7 @@
 from django.core import urlresolvers, paginator
 import urllib
 
-from thepian.conf import structure
+from theapps.supervisor.sites import Site
 
 PING_URL = "http://www.google.com/webmasters/tools/ping"
 
@@ -29,7 +29,7 @@ def ping_google(sitemap_url=None, ping_url=PING_URL):
     if sitemap_url is None:
         raise SitemapNotFound("You didn't provide a sitemap_url, and the sitemap URL couldn't be auto-detected.")
 
-    current_site = structure.machine.get_default_site()
+    current_site = Site.objects.get_default_site()
     url = "http://%s%s" % (current_site.domain, sitemap_url)
     params = urllib.urlencode({'sitemap':url})
     urllib.urlopen("%s?%s" % (ping_url, params))
@@ -64,7 +64,7 @@ class Sitemap(object):
         if request:
             current_site = request.site
         else:
-            current_site = structure.machine.get_default_site()
+            current_site = Site.objects.get_default_site()
         urls = []
         for item in self.paginator.page(page).object_list:
             loc = "http://%s%s" % (current_site.domain, self.__get('location', item))

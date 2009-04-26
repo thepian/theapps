@@ -10,6 +10,8 @@ from thepian.tickets import Affinity, IdentityAccess
 from thepian.conf import structure
 from userdata import UserData
 
+from theapps.supervisor.sites import Site
+
 def new_affinity(meta,old_affinity=None):
     ip4 = meta.get('HTTP_X_FORWARDED_FOR') or meta.get('HTTP_X_REAL_IP') or meta.get('REMOTE_ADDR') or '127.0.0.1'
     
@@ -77,7 +79,7 @@ def patch_site():
         if hasattr(request,'site'):
             site = request.site
         else:
-            site = structure.machine.get_default_site()
+            site = Site.objects.get_default_site()
         self.domain = site.domain
         self.name = site.name
     models.RequestSite.__init__ = init
@@ -88,7 +90,7 @@ class SiteMiddleware(object):
     def process_request(self,request):
         request.is_ajax = request.META.get('HTTP_X_REQUESTED_WITH', None) == 'XMLHttpRequest'
         host = request.META.get('HTTP_HOST',structure.machine.DOMAINS[0])
-        request.site = structure.machine.get_site(host)
+        request.site = Site.objects.get_site(host)
         if not site_patched:
             patch_site()
         #if not hasattr(request.site,"robot_rules"):

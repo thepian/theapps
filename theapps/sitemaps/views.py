@@ -103,12 +103,12 @@ def robots_txt(request, template_name='sitemaps/robots.txt',
     #TODO check request.site.root_domain as well
     for url in resolver.url_patterns:
         if hasattr(url,"allow") and url.allow:
-            #print request.site.cluster, url.allow.sites
-            if len(url.allow.sites) == 0 or request.site.cluster in url.allow.sites:
+            #print request.site, url.allow.sites
+            if len(url.allow.sites) == 0 or request.site.domain in url.allow.sites: #TODO review key in allow.sites
                 rules.extend(url.allow.get_expanded(url.regex.pattern))  
         if hasattr(url,"disallow") and url.disallow:
-            #print request.site.cluster, url.disallow.sites
-            if len(url.disallow.sites) == 0 or request.site.cluster in url.disallow.sites:
+            #print request.site, url.disallow.sites
+            if len(url.disallow.sites) == 0 or request.site.domain in url.disallow.sites: #TODO review key in disallow.sites
                 rules.extend(url.disallow.get_expanded(url.regex.pattern))  
         
     if not len(rules):
