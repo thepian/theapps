@@ -7,7 +7,6 @@ from django import http
 from django.core.mail import mail_admins
 
 from thepian.tickets import Affinity, IdentityAccess
-from thepian.conf import structure
 from userdata import UserData
 
 from theapps.supervisor.sites import Site
@@ -89,7 +88,7 @@ def patch_site():
 class SiteMiddleware(object):
     def process_request(self,request):
         request.is_ajax = request.META.get('HTTP_X_REQUESTED_WITH', None) == 'XMLHttpRequest'
-        host = request.META.get('HTTP_HOST',structure.machine.DOMAINS[0])
+        host = request.META.get('HTTP_HOST',settings.DOMAINS[0])
         request.site = Site.objects.get_site(host)
         if not site_patched:
             patch_site()
