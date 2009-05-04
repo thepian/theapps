@@ -4,6 +4,7 @@ import urllib
 from theapps.supervisor.sites import Site
 
 PING_URL = "http://www.google.com/webmasters/tools/ping"
+ROBOTSTXT_URL = "http://www.robotstxt.org/db/all.txt"
 
 class SitemapNotFound(Exception):
     pass

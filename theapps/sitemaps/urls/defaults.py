@@ -1,7 +1,7 @@
 from django.core.urlresolvers import RegexURLPattern, RegexURLResolver
 from django.core.exceptions import ImproperlyConfigured
 
-from theapps.supervisor.sites import RobotRule
+from theapps.sitemaps.robots import RobotRule
 
 __all__ = ['handler404', 'handler500', 'include', 'patterns', 'url', 'allow', 'disallow', 'hide']
 

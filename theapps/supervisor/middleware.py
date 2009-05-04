@@ -73,6 +73,7 @@ class DeviceMiddleware(object):
 site_patched = False
 
 def patch_site():
+    """Override the Django RequestSite constructor with a function that gets the site from the request"""
     from django.contrib.sites import models
     def init(self,request):
         if hasattr(request,'site'):
