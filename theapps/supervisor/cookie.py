@@ -27,7 +27,8 @@ class CookieSigner(object):
     def __init__(self,name,constructor,get_secret,message_envelope="%(key)s:%(value)s"):
         """
         constructor - Constructor function for value I.E. Identity(**kwargs)
-        get_secret - Method to be provide the hash secret I.E. get_secret(key,value)
+        get_secret - Method to be provide the hash secret I.E. get_secret(key,value,secret_context)
+        message_envelope - Renders the message encoded in the signature. In addition to 'key' & 'value', the additional dict is passed to the template
         """
         self.name = name
         self.constructor = constructor
@@ -38,7 +39,7 @@ class CookieSigner(object):
         d = dict(additional,key=key,value=value)
         return hmac.new(secret, self.message_envelope % d, sha1).hexdigest()
         
-    def input(self,cookies,additional={}):
+    def input(self,cookies,additional={},secret_context=None):
         """Fetch value from a cookies dictionary, and additional contructor/digest parameters
         
         @returns Value made with constructor otherwise None
@@ -51,18 +52,16 @@ class CookieSigner(object):
                 raise SuspiciousOperation("Cookie '%s' is not signed" % self.name)
             signature, unsigned_value = bits
             value = self.constructor(encoded=unsigned_value,**additional)
-            secret = self.get_secret(self.name,value)
+            secret = self.get_secret(self.name,value,secret_context)
             if self._get_digest(self.name, unsigned_value, secret, additional) != signature:
                 raise SuspiciousOperation("Cookie '%s' is incorrectly signed" % self.name)
             return value
         return None
         
-    def output(self,response,value, max_age=None, expires=None, path=None, domain=None, secure=None,additional={}):
+    def output(self,response,value, max_age=None, expires=None, path=None, domain=None, secure=None,additional={},secret_context=None):
         if value:
             value_part = value.encoded
-            get_secret = self.get_secret
-            #SignedCookie.get_secret(1,2)
-            secret = get_secret(self.name,value)                        
+            secret = self.get_secret(self.name,value,secret_context)                        
             encoded = self.join_template % (self._get_digest(self.name,value_part,secret,additional),value_part) 
             response.set_cookie(self.name, value=encoded, 
                 max_age=max_age or self.max_age, 

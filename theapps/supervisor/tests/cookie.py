@@ -15,7 +15,7 @@ class SillyIdentity(object):
     def __repr__(self):
         return "Silly<%s>" % self.encoded
         
-def get_secret(key,identity):
+def get_secret(key,identity,context):
     return "not very secret"#settings.SECRET_KEY
     
 """
@@ -86,27 +86,27 @@ class CookieTest(TestCase):
         value = SillyIdentity(encoded="4444")
         response = HttpResponse('')
         self.checked_signer.output(response,value)
-        assert 'Set-Cookie: checked="00ccc469e0019ccac74d45ea0c6d2d6a94bca2e9:4444"; Path=/' in str(response.cookies).splitlines()
+        assert 'Set-Cookie: checked="00ccc469e0019ccac74d45ea0c6d2d6a94bca2e9:4444"; Path=/' in response.cookies.output().splitlines()
 
         value = SillyIdentity(encoded="4444")
         response = HttpResponse('')
         self.checked_signer.output(response,value, path="/nowhere")
-        assert 'Set-Cookie: checked="00ccc469e0019ccac74d45ea0c6d2d6a94bca2e9:4444"; Path=/nowhere' in str(response.cookies).splitlines()
+        assert 'Set-Cookie: checked="00ccc469e0019ccac74d45ea0c6d2d6a94bca2e9:4444"; Path=/nowhere' in response.cookies.output().splitlines()
 
         value = SillyIdentity(encoded="4444")
         response = HttpResponse('')
         self.checked_signer.output(response,value, domain="www.test.local")
-        assert 'Set-Cookie: checked="00ccc469e0019ccac74d45ea0c6d2d6a94bca2e9:4444"; Domain=www.test.local; Path=/' in str(response.cookies).splitlines(), response.cookies
+        assert 'Set-Cookie: checked="00ccc469e0019ccac74d45ea0c6d2d6a94bca2e9:4444"; Domain=www.test.local; Path=/' in response.cookies.output().splitlines(), response.cookies
 
     def test_new_cookie_tail(self):
         value = SillyIdentity(encoded="4444")
         response = HttpResponse('')
         self.extra_signer.output(response,value,additional=dict(tail="TAIL"))
-        assert 'Set-Cookie: extra="7afbf24a1d54404e4001cc345a5ec6882f4eed96:4444"; Path=/' in str(response.cookies).splitlines()
+        assert 'Set-Cookie: extra="7afbf24a1d54404e4001cc345a5ec6882f4eed96:4444"; Path=/' in response.cookies.output().splitlines()
 
         response = HttpResponse('')
         self.extra_signer.output(response,value,additional=dict(tail="ANOTHER_TAIL"))
-        assert 'Set-Cookie: extra="d60ce623f1855e1903afea0a5a5d779894870e4a:4444"; Path=/' in str(response.cookies).splitlines()
+        assert 'Set-Cookie: extra="d60ce623f1855e1903afea0a5a5d779894870e4a:4444"; Path=/' in response.cookies.output().splitlines()
 
     #TODO consider if special Error should be raised if message_envelope relies on non-existing additional value
 
