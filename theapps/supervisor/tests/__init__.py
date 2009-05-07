@@ -4,6 +4,6 @@ from cookie import CookieTest
 
 __test__ = {
     #'BASIC_TESTS': BASIC_TESTS,
-    'DEVICE_TESTS': DeviceTest,
     'COOKIE_TESTS': CookieTest,
+    'DEVICE_TESTS': DeviceTest,
 }

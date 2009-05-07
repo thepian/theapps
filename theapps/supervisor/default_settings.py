@@ -1,5 +1,7 @@
+AFFINITY_MODULE = "theapps.supervisor.affinity"
 AFFINITY_COOKIE_NAME = "affinity"
 AFFINITY_ACCESS_COOKIE_NAME = "affinity_access"
+AFFINITY_EXPIRY = "Mdy, 01-Jan-2038 00:00:00 GMT"
 
 USERDATA_COOKIE_NAME = "userdata"
 #USERDATA_COOKIE_DOMAIN

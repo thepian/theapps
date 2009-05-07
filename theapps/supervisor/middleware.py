@@ -5,71 +5,85 @@ from time import time,sleep, gmtime
 from django.conf import settings
 from django import http
 from django.core.mail import mail_admins
-
-from thepian.tickets import Affinity, IdentityAccess
+from django.core.exceptions import SuspiciousOperation
+from django.dispatch import Signal
 from userdata import UserData
 
 from theapps.supervisor.sites import Site
+from theapps.supervisor.cookie import CookieSigner
 
-def new_affinity(meta,old_affinity=None):
-    ip4 = meta.get('HTTP_X_FORWARDED_FOR') or meta.get('HTTP_X_REAL_IP') or meta.get('REMOTE_ADDR') or '127.0.0.1'
-    
-    affinity = Affinity(meta,ip4=ip4)
-    if old_affinity:
-        affinity.replaced = True
-        affinity.old = old_affinity
-    else:
-        affinity.replaced = False
-    return affinity
+try:
+    # Use affinity classes from the configured module
+    from django.importlib import import_module
+    mod = import_module(settings.AFFINITY_MODULE)
+    Affinity, AffinityAccess, get_secret = mod.Affinity, mod.AffinityAccess, mod.get_secret
+except ImportError:    
+    from theapps.supervisor.affinity import Affinity, AffinityAccess, get_secret
+
+def to_cookie_domain(http_host):
+    s = http_host.split(".")
+    if s[0] in ['media','www']: #TODO improve test to work off configuration
+        del s[0]
+    return ".".join(s)
+
+affinity_generated_signal = Signal(providing_args=["request","response"])
+affinity_replaced_signal = Signal(providing_args=["request","response"])
+affinity_access_generated_signal = Signal(providing_args=["request","response"])
+affinity_access_replaced_signal = Signal(providing_args=["request","response"])
 
 class DeviceMiddleware(object):
     """
     Ensures that the devices has an affinity cookie
+    
+    affinity.generated  First visit
+    affinity.replaced   Cookie rejected, affinity replaced
+    affinity.changed    Cookie changed, and will be set in response
     """
+    affinity_signer = CookieSigner(settings.AFFINITY_COOKIE_NAME,constructor=Affinity,get_secret=get_secret)
+    access_signer = CookieSigner(settings.AFFINITY_ACCESS_COOKIE_NAME,constructor=AffinityAccess,get_secret=get_secret,message_envelope="%(key)s:%(value)s:%(identity)s")
+    
     def process_request(self, request):
-        encoded = request.COOKIES.get(settings.AFFINITY_COOKIE_NAME)
-        if encoded:
-            affinity = Affinity(request.META,encoded=encoded)
-            affinity.replaced = False
-            check, check_result, check_pass = affinity.extract_check()
-            if not check_pass:
-                affinity = new_affinity(request.META,affinity)
+        try:
+            request.affinity = self.affinity_signer.input(request.COOKIES)
+        except SuspiciousOperation:
+            request.affinity = Affinity(meta=request.META)
+            request.affinity.replaced = True              
+            request.affinity.generated = False              
         else:
-            affinity = new_affinity(request.META)
+            request.affinity = Affinity(meta=request.META)
+            request.affinity.replaced = False              
             
-        request.affinity = affinity
-        # HTTP_USER_AGENT
-        
-        encoded = request.COOKIES.get(settings.AFFINITY_ACCESS_COOKIE_NAME)
-        if encoded:
-            access = IdentityAccess(request.META,identity=affinity,encoded=encoded)
+        try:
+            request.affinity_access = self.affinity_signer.input(request.COOKIES,additional={'identity':request.affinity})
+        except SuspiciousOperation:
+            request.affinity_access = AffinityAccess(meta=request.META,identity=request.affinity)
+            request.affinity_access.replaced = True              
+            request.affinity_access.generated = False              
         else:
-            #TODO check database?
-            access = IdentityAccess(request.META,identity=affinity)
-        request.affinity_access = access 
-        
+            request.affinity_access = AffinityAccess(meta=request.META)
+            request.affinity_access.replaced = False             
+
         return None
 
     def process_response(self, request, response):
-        if hasattr(request,'affinity'):
-            affinity = request.affinity
-            if affinity.generated:
-                # The browser was given a new affinity
-                response.set_cookie(settings.AFFINITY_COOKIE_NAME, affinity.encoded, expires = affinity.cookie_expiry, domain = affinity.cookie_domain)
-                #print 'setting ', affinity.encoded, affinity.cookie_domain
-            if affinity.replaced:
-                # Invalid affinity was skipped
-                pass
-                #print 'new affinity'
-                #TODO record referer domain and path
-                
-        if hasattr(request,'affinity_access'):
-            access = request.affinity_access
-            if access.generated or access.changed:
-                #TODO HttpOnly flag
-                response.set_cookie(settings.AFFINITY_ACCESS_COOKIE_NAME, access.encoded, expires = access.cookie_expiry, domain = access.cookie_domain) #, HttpOnly=True)
+        cookie_domain = to_cookie_domain(request.META.get('HTTP_HOST',settings.DOMAINS[0]))
+        if request.affinity.changed:
+            if request.affinity.generated:
+                affinity_generated_signal.send(self,request=request,response=response)
+            if request.affinity.replaced:
+                affinity_replaced_signal.send(self,request=request,response=response)
+            self.affinity_signer.output(response,request.affinity,expires=settings.AFFINITY_EXPIRY,domain=cookie_domain)
+            
+        if request.affinity_access.changed:
+            if request.affinity_access.generated:
+                affinity_access_generated_signal.send(self,request=request,response=response)
+            if request.affinity_access.replaced:
+                affinity_access_replaced_signal.send(self,request=request,response=response)
+            #TODO HttpOnly flag
+            self.access_signer.output(response,request.affinity_access,expires=settings.AFFINITY_EXPIRY,domain=cookie_domain,additional={'identity':request.affinity})
+        
         return response
-
+        
 site_patched = False
 
 def patch_site():

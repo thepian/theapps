@@ -8,7 +8,6 @@ from thepian.conf import structure
 from meta import MetaInformation
 
 def vars(request):
-    check, check_result, check_pass = request.affinity.extract_check()
     return {
         'SITE_TITLE' : settings.SITE_TITLE,
         'SITE' : request.site,
@@ -17,15 +16,15 @@ def vars(request):
         'contact_email': getattr(settings, 'CONTACT_EMAIL', ''),
         'CONTACT_EMAIL': getattr(settings, 'CONTACT_EMAIL', ''),
         'AFFINITY' : request.affinity,
-        'AFFINITY_IP' : request.affinity.remote_addr,
-        'AFFINITY_TIME' : request.affinity.first_datetime, 
-        'AFFINITY_SHARD' : request.affinity.subdomain,
-        'AFFINITY_NUMBER' : request.affinity.number,
-        'AFFINITY_PASS' : check_pass,
-        'AFFINITY_CHECK' : '%s == %s' %  (check, check_result),
+        'AFFINITY_IP' : request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR') or '127.0.0.1',
+        #'AFFINITY_TIME' : request.affinity.first_datetime, 
+        #'AFFINITY_SHARD' : request.affinity.subdomain,
+        #'AFFINITY_NUMBER' : request.affinity.number,
+        'AFFINITY_PASS' : not request.affinity.changed,
+        'AFFINITY_CHECK' : 'no affinity debug info', #'%s == %s' %  (check, check_result),
         'HTTP_COUNTRY' : request.META.get(structure.HTTP_COUNTRY_VARIABLE),
         'HTTP_HOST' : request.site.base_domain,
-        'SHARD_DOMAIN' : request.affinity.domain
+        #'SHARD_DOMAIN' : request.affinity.domain
     }
 
 def settings_vars(request):
