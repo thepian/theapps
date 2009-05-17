@@ -1,0 +1,52 @@
+{% extends "blog/base_blog.html" %}
+
+{% load blog %}
+
+{% block title %}Blog | {{ object.title|escape }}{% endblock %}
+{% block body_id %}post_detail_page{% endblock %}
+
+
+{% block main_title %}
+  <h2 style="margin-bottom:0">{{ object.title }}</h2>
+  <p class="other_posts">
+    {% if object.get_previous_by_publish %}
+    <a class="previous" href="{{ object.get_previous_by_publish.get_absolute_url }}">&laquo; {{ object.get_previous_by_publish }}</a>
+    {% endif %}
+    {% if object.get_next_by_publish %}
+    | <a class="next" href="{{ object.get_next_by_publish.get_absolute_url }}">{{ object.get_next_by_publish }} &raquo;</a> 
+    {% endif %}
+  </p>
+{% endblock %}
+
+
+{% block main %}
+  {% load blog markup tagging_tags %}
+  {% if object.illustration %}<img src="{{ object.illustration }}" alt="illustration">
+  {% endif %}
+  <p class="date">{{ object.publish|date:"j F Y" }}</p>
+  
+  <div class="body">
+    {{ object.body|safe }}
+  </div>
+  
+  {% tags_for_object object as tag_list %}
+  {% if tag_list %}
+  <p class="inline_tag_list"><strong>Related tags:</strong>
+    {% for tag in tag_list %}
+    {{ tag }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  </p>
+  {% endif %}
+  
+
+{% endblock %}
+
+{% block sidebar %}
+{% get_latest_posts 10 as latest_post_list %}
+<h3><br>R&thinsp;E&thinsp;C&thinsp;E&thinsp;N&thinsp;T&thinsp;</h3>
+<ul>
+{% for post in latest_post_list %}
+<li><a href="{{ post.get_absolute_url }}">{{ post }}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}

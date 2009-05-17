@@ -1,0 +1,23 @@
+{% extends "blog/base_blog.html" %}
+
+
+{% block title %}Post archive for {{ day|date:"d F Y" }}{% endblock %}
+{% block body_id %}post_archive{% endblock %}
+
+
+{% block main_title %}
+  <h2>Post archive for {{ day|date:"d F Y" }}</h2>
+{% endblock %}
+
+
+{% block main %}
+  <div class="post_list">
+    {% for post in object_list %}
+    <div>
+      <h3 class="title"><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+      <p class="date">{{ post.publish|date:"Y F d" }} by {{ post.author }} under {{ post.category }}</p>
+      <p class="tease">{{ post.tease|safe }}</p>
+    </div>
+    {% endfor %}
+  </div>
+{% endblock %}

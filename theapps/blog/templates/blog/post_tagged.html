@@ -1,0 +1,25 @@
+{% extends "blog/base_blog.html" %}
+
+{% block title %} Weblog | Entries tagged "{{ tag }}"{% endblock %}
+
+{% block main %}
+{% load tagging_tags %}
+
+<h2>Entries with tag "{{ tag }}"</h2>
+
+{% for post in object_list %}
+{% tags_for_object post as tags %}
+  <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+  <p>{{ post.pub_date|date:"F j, Y" }}</p>
+  <p>
+  {% if tags %}
+    <b>Tags:</b>
+    {% for tag in tags %}
+      <a href="{% url blog_tagged_list tag %}">{{ tag }}</a>{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  {% endif %}
+</p>
+  {{ post.tease|safe }}
+{% endfor %}
+
+{% endblock %}
