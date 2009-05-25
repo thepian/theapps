@@ -8,7 +8,7 @@ from django.views.generic.list_detail import object_list
 class TaggedObjectDetail(ObjectDetail):
     
     def __call__(self, request, year, month, object_id=None, slug=None,  extra_context=None, mimetype=None):
-        super(TaggedObjectDetail,self).__call__(request, year, month, object_id, slug,  extra_context, mimetype):
+        super(TaggedObjectDetail,self).__call__(request, year, month, object_id, slug,  extra_context, mimetype)
 
 
 def tagged_object_list(request, queryset_or_model=None, tag=None,
