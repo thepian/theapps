@@ -10,7 +10,7 @@ class BlogSitemap(Sitemap):
         super(BlogSitemap,self).__init__()
 
     def items(self):
-        return Post.published.all()
+        return Post.objects.published()
 
     def lastmod(self, obj):
         return obj.publish

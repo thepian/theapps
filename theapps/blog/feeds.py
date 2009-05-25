@@ -35,8 +35,8 @@ class BlogPostsFeed(Feed):
 
     def items(self, obj):
         if not obj:
-            return Post.published.all()[:10]
-        return Post.published.filter(category=obj)[:10] # obj.post_set.published()
+            return Post.objects.published()[:10]
+        return Post.objects.published().filter(category=obj)[:10] # obj.post_set.published()
         
     def item_pubdate(self, obj):
         return obj.publish
@@ -68,7 +68,7 @@ class BlogPostsByCategory(Feed):
         return "Posts recently categorized as %s" % obj.title
     
     def items(self, obj):
-        return Post.published.filter(category=obj)[:10] # obj.post_set.published()
+        return Post.objects.published().filter(category=obj)[:10] # obj.post_set.published()
         
     def item_pubdate(self, obj):
         return obj.publish

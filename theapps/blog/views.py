@@ -7,6 +7,8 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.views.generic import date_based, list_detail
 from theapps.blog.models import *
 
+from theapps.publish.views import ArchiveYear, ArchiveMonth, ObjectDetail, TaggedObjectDetail
+
 #from theapps.tagging.models import Tag
 #from theapps.tagging.utils import get_tag
 
@@ -15,88 +17,25 @@ import re
 
 BLOG_PAGINATE_BY = 15
 
+archive_year = ArchiveYear(queryset=Post.objects.public(), date_field='publish')
+archive_month = ArchiveMonth(queryset=Post.objects.public(), date_field='publish')
+object_detail = ObjectDetail(queryset=Post.objects.public(), date_field='publish')
+tagged_view = TaggedObjectDetail(queryset=Post.objects.public(), date_field='publish', template_name='blog/post_tagged.html')
+
 def post_latest(request):
-    latest = Post.published.all()[0]
+    latest = Post.objects.published()[0]
     return HttpResponseRedirect(latest.get_absolute_url())
     
 
 def post_list(request, page=0, paginate_by = BLOG_PAGINATE_BY, queryset = None):
     return list_detail.object_list(
         request,
-        queryset = queryset or Post.published.all(),
+        queryset = queryset or Post.objects.published(),
         paginate_by = paginate_by,
         page = page,
     )
 post_list.__doc__ = list_detail.object_list.__doc__
 
-
-def post_detail(request, year, month, queryset, date_field, month_format='%b', object_id=None, slug=None, 
-        slug_field='slug', template_name=None, template_name_field=None,
-        template_object_name='object', mimetype=None, allow_future=False
-        ):
-    """
-    An implementation similar to ``django.views.generic.date_based.object_detail``
-    It assumes slug uniqueness within month, so it doesn't require day.
-    
-    which creates a ``QuerySet`` containing drafts and future entries if
-    user has permission to change entries (``blog.change_entry``).
-
-    This is useful for preview entries with your own templates and CSS.
-
-    Tip: Uses the *View on site* button in Admin interface to access yours
-    drafts and entries in future.
-    """
-    try:
-        y,m,d = time.strptime(year+month+"01", '%Y'+month_format+"%d")[:3]
-        date = datetime.date(y,m,d)
-        date_to = datetime.date(y,m,calendar.monthrange(y,m)[1])
-    except ValueError,e:
-        import sys
-        from traceback import print_exc
-        print e
-        print_exc(file=sys.stdout)
-        raise Http404
-
-    model = queryset.model
-
-    if isinstance(model._meta.get_field(date_field), DateTimeField):
-        lookup_kwargs = {'%s__range' % date_field: (datetime.datetime.combine(date, datetime.time.min), datetime.datetime.combine(date_to, datetime.time.max))}
-    else:
-        lookup_kwargs = {'%s__range' % date_field: (date, date_to) }
-
-    if request.user.has_perm('blog.change_post'):
-        allow_future = True
-        queryset = Post.objects.all()
-        
-    if object_id:
-        lookup_kwargs['%s__exact' % model._meta.pk.name] = object_id
-    elif slug and slug_field:
-        lookup_kwargs['%s__exact' % slug_field] = slug
-    else:
-        raise AttributeError, "Generic detail view must be called with either an object_id or a slug/slugfield"
-    try:
-        obj = queryset.get(**lookup_kwargs)
-        obj_date = getattr(obj,date_field)
-        now = datetime.datetime.now()
-        if isinstance(obj_date,datetime.datetime):
-            obj_date = obj_date.date()
-        if obj_date >= now.date() and not allow_future:
-            raise ObjectDoesNotExist("In the future")
-    except ObjectDoesNotExist:
-        raise Http404, "No %s found for" % model._meta.verbose_name
-        
-    if not template_name:
-        template_name = "%s/%s_detail.html" % (model._meta.app_label, model._meta.object_name.lower())
-    if template_name_field:
-        template_name_list = [getattr(obj, template_name_field), template_name]
-        t = loader.select_template(template_name_list)
-    else:
-        t = loader.get_template(template_name)
-    c = RequestContext(request, { template_object_name: obj })
-
-    response = HttpResponse(t.render(c), mimetype=mimetype)
-    populate_xheaders(request, response, model, getattr(obj, obj._meta.pk.name))
-    return response
 
 
 def category_list(request):
@@ -129,7 +68,7 @@ def category_detail(request, slug):
 
     return list_detail.object_list(
         request,
-        queryset = category.post_set.published(),
+        queryset = category.post_set.published(), # Post.published.published(category.post_set) 
         extra_context = {'category': category},
         template_name = 'blog/category_detail.html',
     )

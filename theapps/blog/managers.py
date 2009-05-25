@@ -20,15 +20,19 @@ class AuthorManager(Manager):
             author = self.create_from_user(user)
     
 
-class PublishedManager(Manager):
+class BlogManager(Manager):
     """Returns published posts that are not in the future."""
     def __init__(self, *args, **kwargs):
-        self.filter_dict = dict(status__gte=2, publish__lte=datetime.now()) #TODO use callable?
-        super(PublishedManager, self).__init__(*args, **kwargs)
+        self.public_filter_dict = dict(status__gte=2)
+        self.filter_dict = dict(status__gte=2, publish__lte=datetime.now) # It is crucial that now is a callable, not a constant
+        super(BlogManager, self).__init__(*args, **kwargs)
     
-    def get_query_set(self):
-        return super(PublishedManager, self).get_query_set().filter(**self.filter_dict)
+    #def get_query_set(self):
+    #    return super(PublishedManager, self).get_query_set().filter(**self.filter_dict)
     
+    def public(self):
+        return self.get_query_set().filter(**self.public_filter_dict)
+        
     def published(self):
         return self.get_query_set().filter(**self.filter_dict)
         
@@ -36,5 +40,6 @@ class PublishedManager(Manager):
         """
         Returns a QuerySet for a tag
         """
-        from theapps.tagging.models import TaggedItem
-        return TaggedItem.objects.get_by_model(self.get_query_set(),tag_instance)
+        pass
+        # TODO from theapps.tagging.models import TaggedItem
+        # return TaggedItem.objects.get_by_model(self.get_query_set(),tag_instance)

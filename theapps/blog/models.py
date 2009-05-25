@@ -1,3 +1,4 @@
+import sys
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import permalink
@@ -9,7 +10,14 @@ from theapps.media.fields import MediaURLField
 
 from datetime import datetime
 from managers import *
-from theapps.tagging.fields import TagField
+from theapps.publish.fields import TagField
+from theapps.publish.models import TagBase
+
+class Tag(TagBase):
+    object      = models.ForeignKey(Post)
+    
+    class Meta:
+        db_table = 'blog_tag'
 
 class Category(models.Model):
     """Category model."""
@@ -48,7 +56,7 @@ MARKUP_CHOICES = (
     ('raw',      _('Raw text')),
 )
 
-DEFAULT_MARKUP_LANG = "markdown"
+DEFAULT_MARKUP_LANG = "textile" #"markdown"
 
 POST_TEMPLATE_CHOICES = (
     ('blog/post_detail.html', 'Standard Template'),
@@ -94,13 +102,13 @@ class Post(models.Model):
     created         = models.DateTimeField(_('created'), auto_now_add=True)
     modified        = models.DateTimeField(_('modified'), auto_now=True)
     category        = models.ForeignKey(Category, blank=True, null=True)
-    tags            = TagField()
+    tags            = TagField(Tag=Tag)
     template_name   = models.CharField(_('template name'), default=DEFAULT_POST_TEMPLATE, max_length=50, choices=POST_TEMPLATE_CHOICES)
     ext_image_url   = models.URLField(_('external url'), blank=True, null=True)
     illustration    = MediaURLField(_('illustration'), blank=True)
     
-    objects         = models.Manager()
-    published       = PublishedManager()
+    #objects         = models.Manager()
+    objects        = BlogManager()
 
     class Meta:
         verbose_name = _('post')
@@ -161,16 +169,20 @@ def markuping(markup, value):
 # Pre Save processing
 
 def post_pre_save(sender, instance, signal, *args, **kwargs):
-    # transform plain text markup in body_source to HTML
+    """
+    1. transform plain text markup in body_source to HTML
+    2. move from draft to pub, set publish date
+    """
     # TODO feedback in admin, and log warning to user
     try:
         instance.body = unicode(markuping(instance.markup, instance.body_source))
-    except Exception:
-        print 'failed to render body markup for blog entry %s' % instance.id
+    except Exception,e:
+        print >>sys.stderr, 'failed to render body markup for blog entry %s' % instance.id
+        print >>sys.stderr, e
     try:
         instance.tease = unicode(markuping(instance.markup, instance.tease_source))
     except Exception:
-        print 'failed to render tease markup for blog entry %s' % instance.id
+        print >>sys.stderr, 'failed to render tease markup for blog entry %s' % instance.id
         
 
     try:
