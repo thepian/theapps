@@ -20,7 +20,7 @@
 
 
 {% block main %}
-  {% load blog markup tagging_tags %}
+  {% load blog markup publish_tags %}
   {% if object.illustration %}<img src="{{ object.illustration }}" alt="illustration">
   {% endif %}
   <p class="date">{{ object.publish|date:"j F Y" }}</p>

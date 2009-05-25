@@ -20,7 +20,7 @@ BLOG_PAGINATE_BY = 15
 archive_year = ArchiveYear(queryset=Post.objects.public(), date_field='publish')
 archive_month = ArchiveMonth(queryset=Post.objects.public(), date_field='publish')
 object_detail = ObjectDetail(queryset=Post.objects.public(), date_field='publish')
-tagged_view = TaggedObjectDetail(queryset=Post.objects.public(), date_field='publish', template_name='blog/post_tagged.html')
+tag_view = TaggedObjectDetail(queryset=Post.objects.public(), date_field='publish', template_name='blog/post_tagged.html')
 
 def post_latest(request):
     latest = Post.objects.published()[0]

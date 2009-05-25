@@ -14,9 +14,9 @@ from theapps.publish.fields import TagField
 from theapps.publish.models import TagBase
 
 class Tag(TagBase):
-    object      = models.ForeignKey(Post)
+    object      = models.ForeignKey("blog.Post",related_name="tags2")
     
-    class Meta:
+    class Meta(TagBase.Meta):
         db_table = 'blog_tag'
 
 class Category(models.Model):
@@ -194,3 +194,4 @@ def post_pre_save(sender, instance, signal, *args, **kwargs):
         pass
 
 signals.pre_save.connect(post_pre_save, sender=Post)
+
