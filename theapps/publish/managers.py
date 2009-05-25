@@ -8,7 +8,6 @@ class ModelTagManager(models.Manager):
         """
         Update tags associated with an object.
         """
-        ctype = ContentType.objects.get_for_model(obj)
         current_tags = list(self.filter(object=obj))
         updated_tag_names = parse_tag_input(tag_names)
         if settings.FORCE_LOWERCASE_TAGS:
