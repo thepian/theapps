@@ -1,5 +1,6 @@
 from django.db import models
 from managers import *
+from django.utils.translation import ugettext as _
 
 class TagBase(models.Model):
     """
