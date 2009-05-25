@@ -6,7 +6,7 @@ from django.db.models.fields import CharField
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
-from utils import edit_string_for_tags
+from tagging import edit_string_for_tags
 
 class TagField(CharField):
     """
