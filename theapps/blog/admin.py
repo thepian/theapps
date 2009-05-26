@@ -1,8 +1,10 @@
 from django import forms
 from django.contrib import admin
-from models import Category, Post, Author
+from models import Tag, Category, Post, Author
 
 from theapps.media.widgets import MediaAssetInput
+
+admin.site.register(Tag)
 
 class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = { 'slug': ('title',)}
