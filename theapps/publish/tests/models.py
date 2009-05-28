@@ -1,20 +1,14 @@
 from django.db import models
 
-from theapps.tagging.fields import TagField
+from theapps.publish.models import TagBase
+from theapps.publish.fields import TagField
 
-class Perch(models.Model):
-    size = models.IntegerField()
-    smelly = models.BooleanField(default=True)
+class LinkTag(TagBase):
+    object = models.ForeignKey('tests.Link',related_name="tags2")
 
-class Parrot(models.Model):
-    state = models.CharField(max_length=50)
-    perch = models.ForeignKey(Perch, null=True)
+    class Meta(TagBase.Meta):
+        db_table = 'tests_link_tag'
 
-    def __unicode__(self):
-        return self.state
-
-    class Meta:
-        ordering = ['state']
 
 class Link(models.Model):
     name = models.CharField(max_length=50)
@@ -25,6 +19,13 @@ class Link(models.Model):
     class Meta:
         ordering = ['name']
 
+class ArticleTag(TagBase):
+    object = models.ForeignKey('tests.Article',related_name="tags2")
+
+    class Meta(TagBase.Meta):
+        db_table = 'tests_article_tag'
+
+
 class Article(models.Model):
     name = models.CharField(max_length=50)
 
@@ -34,5 +35,11 @@ class Article(models.Model):
     class Meta:
         ordering = ['name']
 
+class Tag(TagBase):
+    object = models.ForeignKey('tests.FormTest',related_name="tags2")
+    
+    class Meta(TagBase.Meta):
+        db_table = 'tests_tag'
+
 class FormTest(models.Model):
-    tags = TagField('Test', help_text='Test')
+    tags = TagField(Tag=Tag)
