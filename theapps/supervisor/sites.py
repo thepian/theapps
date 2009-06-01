@@ -22,7 +22,7 @@ class SiteManager(object):
         #TODO consider domain redirection rules
         site = Site()
         site.domain = host
-        site.base_domain = settings.DOMAINS[0]
+        site.base_domain = settings.DOMAINS[0].startswith(".") and settings.DOMAINS[0] or "."+settings.DOMAINS[0]
         for d in settings.DOMAINS:
             host.endswith(d)
             site.base_doamin = d
