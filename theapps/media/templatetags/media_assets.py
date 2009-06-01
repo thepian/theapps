@@ -148,7 +148,7 @@ class UploadButtonNode(template.Node):
         {{ upload_form }}
         </form>
         """
-        from theapps.assets.forms import UploadFileForm
+        from theapps.media.forms import UploadFileForm
         try:
             entity = self.entity.resolve(context)
         except ValueError:
