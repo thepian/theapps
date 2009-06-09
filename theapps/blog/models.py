@@ -105,7 +105,9 @@ class Post(models.Model):
     tags            = TagField(Tag=Tag)
     template_name   = models.CharField(_('template name'), default=DEFAULT_POST_TEMPLATE, max_length=50, choices=POST_TEMPLATE_CHOICES)
     ext_image_url   = models.URLField(_('external url'), blank=True, null=True)
-    illustration    = MediaURLField(_('illustration'), blank=True)
+    illustration    = MediaURLField(_('illustration'), blank=True,
+        help_text=_('Use asset:// or http:// url')
+        )
     
     #objects         = models.Manager()
     objects        = BlogManager()
