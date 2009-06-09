@@ -1,6 +1,8 @@
+import simplejson as json
 from django.http import HttpResponse, Http404
 from django.template import RequestContext, loader
 from django.conf import settings
+from django.utils.safestring import mark_safe
 
 from thepian.tickets import Identity
 from thepian.assets import Asset
@@ -63,6 +65,38 @@ def entity(request, top, middle, iptime, format="html"):
     
     t = loader.get_template('media/query.'+format)
     c = RequestContext(request, { 'entity':entity, 'assets': query })
+
+    return HttpResponse(t.render(c), mimetype=mimetype)
+
+def static_all(request, top, format="html"):
+    mimetype = { 'html':'text/html', 'js':'text/javascript' }[format]
+    assets = Asset.objects.filter(path=("static",top),valid=True)
+    stuff = dict([(a.to_json()['path'],a.to_json()) for a in assets])
+    entities = {}
+    for a in assets:
+        j = a.to_json()
+        entities[j['parent']] = { 
+            'domain': settings.MEDIA_DOMAIN,
+            'path':j['parent'], 
+            'type':'static', 
+            'name': j['parent'].split("/")[-1] 
+            }
+    
+    t = loader.get_template('media/all.'+format)
+    c = RequestContext(request, { 
+        'entities': mark_safe(json.dumps(entities)),
+        'paths': mark_safe(json.dumps(stuff)) 
+        })
+
+    return HttpResponse(t.render(c), mimetype=mimetype)
+
+def static_index(request, top, format="html"):
+    mimetype = { 'html':'text/html', 'js':'text/javascript' }[format]
+    paths = Asset.objects.filter(path=("static",top),valid=True).list_entities_as_paths()
+    paths = dict([(p.path[2], u"%s%s" % (settings.MEDIA_URL,unicode(p))) for p in paths])
+    
+    t = loader.get_template('media/index.'+format)
+    c = RequestContext(request, { 'paths': mark_safe(json.dumps(paths)) })
 
     return HttpResponse(t.render(c), mimetype=mimetype)
     

@@ -2,9 +2,12 @@ import re
 import urlparse
 from django.forms import RegexField, URLField, ValidationError
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_unicode, smart_str
+from django.utils.encoding import smart_unicode, smart_str, force_unicode
+from django.utils.safestring import mark_safe
 
 from django import forms
+from django.forms.widgets import Input
+from django.forms.util import flatatt
 
 class UploadFileForm(forms.Form):
     iframe_name = "upload_frame"
@@ -26,6 +29,29 @@ except ImportError:
     # It's OK if Django settings aren't configured.
     URL_VALIDATOR_USER_AGENT = 'Django (http://www.djangoproject.com/)'
 
+class MediaInput(Input):
+    """
+    Base class for all <input> widgets (except type='checkbox' and
+    type='radio', which are special).
+    """
+    input_type = 'text'
+    
+    class Media:
+        js = ('js/jquery.js', 'js/jquery.ui.js', 'js/mediainput.js', 'static/images/all.js',)
+        css = {
+            'all' : ('css/jquery-ui.css',),
+        } 
+
+    def render(self, name, value, attrs=None):
+        if value is None: value = ''
+        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
+        if value != '':
+            # Only add the 'value' attribute if a value is non-empty.
+            final_attrs['value'] = force_unicode(value)
+        return mark_safe(u'<input%s /><var class="mediainput"><a>A</a><a>B</a></var> <span></span>' % flatatt(final_attrs))
+
+
+
 url_re = re.compile(
     r'^(?:http|https|asset)://' # http:// or https:// or asset://
     r'(?:(?:[A-Z0-9-]+\.)+[A-Z]{2,6}|' #domain...
@@ -43,6 +69,8 @@ class MediaURLFormField(RegexField):
 
     def __init__(self, max_length=None, min_length=None, verify_exists=False,
             validator_user_agent=URL_VALIDATOR_USER_AGENT, *args, **kwargs):
+        widget = MediaInput
+        kwargs['widget'] = widget
         super(MediaURLFormField, self).__init__(url_re, max_length, min_length, *args,
                                        **kwargs)
         self.verify_exists = verify_exists
