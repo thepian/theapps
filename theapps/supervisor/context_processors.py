@@ -12,6 +12,7 @@ def vars(request):
         'SITE_TITLE' : settings.SITE_TITLE,
         'SITE' : request.site,
         'META' : MetaInformation.objects.get_metatags(path=request.path),
+        'HEADERS': request.META,
         #TODO any request.site info?
         'contact_email': getattr(settings, 'CONTACT_EMAIL', ''),
         'CONTACT_EMAIL': getattr(settings, 'CONTACT_EMAIL', ''),
@@ -30,8 +31,9 @@ def vars(request):
 def settings_vars(request):
     """ Not terribly secure if templates can be modified by users """
     return {
-        'STATIC_URL': settings.STATIC_URL,
-        'THEME_STATIC_URL': settings.THEME_STATIC_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
+        # 'STATIC_URL': settings.STATIC_URL,
+        # 'THEME_STATIC_URL': settings.THEME_STATIC_URL,
         'settings': settings,
         }
 
