@@ -6,15 +6,11 @@ function Entity(raw) {
     for(var n in raw) this[n] = raw[n];
 }
 
-
- http:// entities[path].domain + path
- 
-
 Entity.prototype.get_absolute_path = function() {
     return "http://%s%s" % (this.domain,this.path);
 };
 
-Entities.prototype.objects = Entity.objects = {
+Entity.prototype.objects = Entity.objects = {
     'all' : {},
     'update' : function(all) {
         self.all = all;
@@ -44,6 +40,8 @@ Asset.prototype.objects = Asset.objects = {
 
 if (!_Entity) _Entity = Entity;
 if (!_Asset) _Asset = Asset;
+if (!window.Entity) window.Entity = Entity;
+if (!window.Asset) window.Asset = Asset;
 })(Entity,Asset);
 
 Entity.objects.update({{ entities }});
